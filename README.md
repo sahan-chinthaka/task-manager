@@ -12,7 +12,7 @@ Task Manager Java is a Java Swing-based application that provides a user-friendl
 
 - **Task Sorting**: Tasks are sorted based on priority, making it easier to identify high-priority tasks.
 
-- **File-based Persistence**: The application stores tasks in a file named `<username>.txt`, ensuring that task data persists across sessions.
+- **File-based Persistence**: The application stores tasks in a file named `tasks.txt`, ensuring that task data persists across sessions.
 
 
 ## Technologies Used
@@ -27,12 +27,13 @@ Task Manager Java is a Java Swing-based application that provides a user-friendl
 To run the Task Manager Java application, you'll need to have Java Development Kit (JDK) installed on your system. Follow these steps:
 
 ```bash
-  1. Clone the repository: git clone https://github.com/your-username/task-manager-java.git
-  2. Compile the Java source files: javac *.java
+  1. Clone the repository: git clone <https://github.com/MalaikaJunaid/task-manager>
+  2. Compile the Java source files: javac*.java
   3. Run the application: java TM
 
 or
-  1. Clone the repository: git clone https://github.com/your-username/task-manager-java.git
+
+  1. Clone the repository: git clone <https://github.com/MalaikaJunaid/task-manager>
   2. Open the project in NetBeans IDE.
   3. Build and run the application using the IDE's built-in tools.
 ```
