@@ -1,4 +1,3 @@
-
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -66,11 +65,18 @@ public class TM extends JFrame {
 
     private boolean login(String username, String password) 
     {
+        // Assert that login parameters are not null
+        assert username != null : "Username cannot be null";
+        assert password != null : "Password cannot be null";
+
         return username.equals("admin") && password.equals("admin");
     }
 
     private void openTaskManager(String username) 
     {
+        // Assert that username is valid before opening task manager
+        assert username != null && !username.trim().isEmpty() : "Username must not be null or empty";
+
         TaskManagerFrame TM = new TaskManagerFrame(username);
         TM.setVisible(true);
         dispose();
@@ -83,6 +89,9 @@ public class TM extends JFrame {
         private String username;
 
         public TaskManagerFrame(String username) {
+            // Assert constructor parameters
+            assert username != null && !username.trim().isEmpty() : "Username must not be null or empty";
+
             this.username = username;
 
             setTitle("Task Manager");
@@ -138,6 +147,9 @@ public class TM extends JFrame {
             add(buttonPanel, BorderLayout.SOUTH);
 
             loadTasksFromFile();
+
+            // Assert that tasks list is initialized after loading
+            assert tasks != null : "Tasks list must be initialized";
         }
 
         private void loadTasksFromFile() {
@@ -145,10 +157,21 @@ public class TM extends JFrame {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] taskData = line.split(",");
+
+                    // Assert that we have enough data fields for a complete task
+                    assert taskData.length >= 4 : "Task data must contain at least 4 fields: title, description, priority, dueDate";
+
                     String title = taskData[0];
                     String description = taskData[1];
                     String priority = taskData[2];
                     String dueDate = taskData[3];
+
+                    // Assert that critical fields are not empty
+                    assert title != null && !title.trim().isEmpty() : "Task title cannot be null or empty";
+                    assert priority != null && (priority.equals("high") || priority.equals("medium") || priority.equals("low")) :
+                        "Priority must be 'high', 'medium', or 'low'";
+                    assert isValidDateFormat(dueDate) : "Due date must be in valid yyyy-MM-dd format";
+
                     tasks.add(new Task(title, description, priority, dueDate));
                 }
             } catch (IOException e) {
@@ -198,23 +221,44 @@ public class TM extends JFrame {
                 "medium"
         );
 
-        String dueDate; 
+        // Assert that user didn't cancel the dialogs
+        if (title == null || description == null || priority == null) {
+            return; // User cancelled
+        }
+
+        // Assert that required fields are not empty
+        assert !title.trim().isEmpty() : "Task title cannot be empty";
+        assert priority.equals("high") || priority.equals("medium") || priority.equals("low") :
+            "Priority must be 'high', 'medium', or 'low'";
+
+        String dueDate;
         while (true) {
             dueDate = JOptionPane.showInputDialog(TaskManagerFrame.this, "Enter the task due date (yyyy-mm-dd):");
-            if (isValidDateFormat(dueDate)) 
+            if (dueDate == null) {
+                return; // User cancelled
+            }
+            if (isValidDateFormat(dueDate))
             {
                 break;
             } else {
                 JOptionPane.showMessageDialog(TaskManagerFrame.this, "Invalid date format. Please enter the date in yyyy-mm-dd format.");
             }
     }
+
+    // Assert final validation before creating task
+    assert isValidDateFormat(dueDate) : "Due date validation failed";
+
     Task task = new Task(title, description, priority, dueDate);
     tasks.add(task);
     tableModel.addRow(new Object[]{task.title, task.description, task.priority, task.dueDate});
 
     saveTasksToFile();
 }
+
         private boolean isValidDateFormat(String date) {
+    // Assert input is not null
+    assert date != null : "Date string cannot be null";
+
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     dateFormat.setLenient(false);
     try {
@@ -227,8 +271,16 @@ public class TM extends JFrame {
 
         private void editTask() {
     int selectedRow = taskTable.getSelectedRow();
+
+    // Assert that a row is selected
+    assert selectedRow >= 0 : "No row selected for editing";
+    assert selectedRow < tasks.size() : "Selected row index is out of bounds";
+
     if (selectedRow != -1) {
         Task task = tasks.get(selectedRow);
+
+        // Assert that the task exists
+        assert task != null : "Selected task cannot be null";
 
         String title = JOptionPane.showInputDialog(TaskManagerFrame.this, "Enter the new task title:", task.title);
         String description = JOptionPane.showInputDialog(TaskManagerFrame.this, "Enter the new task description:", task.description);
@@ -244,15 +296,32 @@ public class TM extends JFrame {
                 task.priority
         );
 
+        // Check if user cancelled any dialog
+        if (title == null || description == null || priority == null) {
+            return;
+        }
+
+        // Assert valid inputs
+        assert !title.trim().isEmpty() : "Task title cannot be empty";
+        assert priority.equals("high") || priority.equals("medium") || priority.equals("low") :
+            "Priority must be 'high', 'medium', or 'low'";
+
         String dueDate;
         while (true) {
             dueDate = JOptionPane.showInputDialog(TaskManagerFrame.this, "Enter the new task due date (yyyy-mm-dd):");
+            if (dueDate == null) {
+                return; // User cancelled
+            }
             if (isValidDateFormat(dueDate)) {
                 break;
             } else {
                 JOptionPane.showMessageDialog(TaskManagerFrame.this, "Invalid date format. Please enter the date in yyyy-mm-dd format.");
             }
         }
+
+        // Assert final validation
+        assert isValidDateFormat(dueDate) : "Due date validation failed";
+
         task.title = title;
         task.description = description;
         task.priority = priority;
@@ -269,16 +338,34 @@ public class TM extends JFrame {
        
         private void deleteTask() {
             int selectedRow = taskTable.getSelectedRow();
+
+            // Assert that a valid row is selected
+            assert selectedRow >= 0 : "No row selected for deletion";
+            assert selectedRow < tasks.size() : "Selected row index is out of bounds";
+
             if (selectedRow != -1) {
                 tasks.remove(selectedRow);
                 tableModel.removeRow(selectedRow);
 
+                // Assert that the task was actually removed
+                assert !tasks.contains(tasks.get(Math.min(selectedRow, tasks.size() - 1))) || tasks.isEmpty() :
+                    "Task should be removed from list";
+
                 saveTasksToFile();
         }
     }
+
         private void saveTasksToFile() {
+            // Assert that username is valid for file operations
+            assert username != null && !username.trim().isEmpty() : "Username must be valid for file operations";
+
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(username + ".txt"))) {
                 for (Task task : tasks) {
+                    // Assert that each task has valid data before saving
+                    assert task != null : "Task cannot be null when saving";
+                    assert task.title != null && task.description != null && task.priority != null && task.dueDate != null :
+                        "All task fields must be non-null when saving";
+
                     writer.write(task.title + "," + task.description + "," + task.priority + "," + task.dueDate);
                     writer.newLine();
                 }
@@ -295,13 +382,25 @@ public class TM extends JFrame {
         private String dueDate;
 
         public Task(String title, String description, String priority, String dueDate) {
+            // Assert constructor parameters
+            assert title != null && !title.trim().isEmpty() : "Task title cannot be null or empty";
+            assert description != null : "Task description cannot be null";
+            assert priority != null && (priority.equals("high") || priority.equals("medium") || priority.equals("low")) :
+                "Priority must be 'high', 'medium', or 'low'";
+            assert dueDate != null && isValidDateFormat(dueDate) : "Due date must be non-null and in valid format";
+
             this.title = title;
             this.description = description;
             this.priority = priority;
             this.dueDate = dueDate;
         }
     }
+
         private ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
+        // Assert parameters for image resizing
+        assert icon != null : "ImageIcon cannot be null";
+        assert width > 0 && height > 0 : "Width and height must be positive values";
+
         Image img = icon.getImage();
         Image resizedImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(resizedImg);
