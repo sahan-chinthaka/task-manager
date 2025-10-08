@@ -69,7 +69,15 @@ public class TM extends JFrame {
         assert username != null : "Username cannot be null";
         assert password != null : "Password cannot be null";
 
-        return username.equals("admin") && password.equals("admin");
+        return isValidUsername(username) && isValidPassword(password);
+    }
+    
+    private boolean isValidUsername(String username) {
+        return username.equals("admin");
+    }
+    
+    private boolean isValidPassword(String password) {
+        return password.equals("admin");
     }
 
     private void openTaskManager(String username) 
